@@ -12,6 +12,8 @@ def makeDataNotStupid(data):
     for v in data:
         print(len(v))
 
+    print(len(data), len(list(filter(lambda x: len(x) != 0, data))))
+
     return data
 
 
