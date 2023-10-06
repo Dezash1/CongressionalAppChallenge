@@ -1,7 +1,6 @@
-import data.USGS as USGS
-import data.NCEI as NCEI
+import data.NCEI
+import data.USGS
 import ai
 
-USGS = USGS.getCurrentUSGSData()
-ai.train(USGS)
-
+data = data.USGS.getTrainingData()
+ai.train(data)

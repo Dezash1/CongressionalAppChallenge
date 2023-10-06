@@ -1,5 +1,5 @@
 import requests
-
+import json
 
 def getImportantData(raw_data):
     # data_names = []
@@ -23,5 +23,12 @@ def getCurrentData():
     return getImportantData(raw_data)
 
 
-def getTrainingDate():
-    pass
+def getTrainingData():
+    file = open("raw_data.json", "r")
+    data = json.loads(file.read())
+    file.close()
+
+    for i, v in enumerate(data):
+        data[i] = getImportantData(v)
+
+    return data
