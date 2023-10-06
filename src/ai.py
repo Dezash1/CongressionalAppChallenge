@@ -9,6 +9,8 @@ from sklearn.preprocessing import MinMaxScaler
 def makeDataNotStupid(data):
     print(data)
 
+    print("Destupided")
+
     return data
 
 

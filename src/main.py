@@ -1,5 +1,5 @@
-import data.USGS as USGS
+import data.USGS
 import ai
 
-USGS = USGS.getCurrentUSGSData()
-ai.train(USGS)
+data = data.USGS.getTrainingData()
+ai.train(data)
