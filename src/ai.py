@@ -6,17 +6,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 
+def makeDataNotStupid(data):
+    print(data)
+
+    return data
+
+
 def train(data):
     # Load your dataset
-    data = pd.read_csv("water_quality_data.csv")
+    data = makeDataNotStupid(data)
 
     # Split the data into features and target metrics
-    X = data.drop(
-        ["target_metric_1", "target_metric_2", ...], axis=1
-    )  # Replace with your metric names
-    y = data[
-        ["target_metric_1", "target_metric_2", ...]
-    ]  # Replace with your metric names
+    X = None
+    y = None
 
     # Normalize the features
     scaler = MinMaxScaler()
