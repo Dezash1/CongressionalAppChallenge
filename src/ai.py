@@ -1,53 +1,46 @@
 import numpy as np
+import pandas as pd
 import tensorflow as tf
+from tensorflow import keras
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
-def run(data):
-    # Generate some synthetic data for demonstration purposes
-    # In reality, you would need real data for training
-    X = np.random.rand(100, 5)  # 5 water quality metrics as features
-    y = np.random.randint(
-        0, 2, 100
-    )  # Binary classification (0 for no algal bloom, 1 for algal bloom)
+def train(data):
+    # Load your dataset
+    data = pd.read_csv("water_quality_data.csv")
+
+    # Split the data into features and target metrics
+    X = data.drop(
+        ["target_metric_1", "target_metric_2", ...], axis=1
+    )  # Replace with your metric names
+    y = data[
+        ["target_metric_1", "target_metric_2", ...]
+    ]  # Replace with your metric names
+
+    # Normalize the features
+    scaler = MinMaxScaler()
+    X_normalized = scaler.fit_transform(X)
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X_normalized, y, test_size=0.2, random_state=42
     )
 
-    # Standardize the features (mean=0, std=1)
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-
-    # Define a simple neural network model
-    model = tf.keras.Sequential(
+    model = keras.Sequential(
         [
-            tf.keras.layers.Input(shape=(5,)),
-            tf.keras.layers.Dense(16, activation="relu"),
-            tf.keras.layers.Dense(1, activation="sigmoid"),
+            keras.layers.Dense(64, activation="relu", input_shape=(X_train.shape[1],)),
+            keras.layers.Dense(32, activation="relu"),
+            keras.layers.Dense(y_train.shape[1]),  # Output layer for multiple metrics
         ]
     )
 
     # Compile the model
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer="adam", loss="mean_squared_error")
 
-    # Train the model
     model.fit(
-        X_train, y_train, epochs=50, batch_size=16, validation_data=(X_test, y_test)
+        X_train, y_train, epochs=50, batch_size=32, validation_data=(X_test, y_test)
     )
 
-    # Evaluate the model on the test set
-    loss, accuracy = model.evaluate(X_test, y_test)
-    print(f"Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}")
-
-    # Make predictions on new data (replace with real water quality metrics)
-    new_data = np.array([[0.1, 0.2, 0.3, 0.4, 0.5]])  # Replace with actual values
-    new_data = scaler.transform(new_data)
-    predictions = model.predict(new_data)
-    if predictions[0][0] > 0.5:
-        print("Algal bloom is likely.")
-    else:
-        print("No algal bloom is likely.")
+    loss = model.evaluate(X_test, y_test)
+    print(f"Test Loss: {loss}")
