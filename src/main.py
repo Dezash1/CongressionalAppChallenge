@@ -1,5 +1,5 @@
 import data
-import ai
+# import ai
 
-data = data.getCurrentUSGSData()
-ai.run(data)
+data = data.getCurrentUSGSData(1)
+# ai.run(data)
