@@ -1,19 +1,20 @@
 import requests
 import json
 
-ncei_site = 'https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:11791&startdate=2023-09-19&enddate=2023-10-06&limit=1000'
+with open('data/NCEI_Token', 'r') as token_file:
+    token = token_file.read()
+ncei_site = 'https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:11791&limit=1000'
 # ncei_site = 'https://www.ncei.noaa.gov/cdo-web/api/v2/datatypes?datasetid=GHCND&locationid=ZIP:11791'
-response_API = requests.get(ncei_site)
-def getCurrentNCEIData():
-    print('getting')
-    response_API = requests.get(ncei_site, headers={'token': 'kmTpwXwhZXthHCXTkjHIRYWwtxlwgDEE'})
-    print('got')
-    data = response_API.text
-    parse_json = json.loads(data)
-    data = parse_json['results']
-    meta = parse_json['metadata']['resultset']
-    print(meta)
-    ordered_data = {'Precipitation' : [[], []], 'MaxTemp': [[], []], 'MinTemp': [[], []], 'TOBS?': [[], []] }
+
+
+def getData(startdate, enddate):  # YYYY-MM-DD
+    site = ncei_site + '&startdate=' + startdate + '&enddate=' + enddate
+    print(site)
+    data = requests.get(ncei_site, headers={'token': token}).json()
+    meta = data['metadata']['resultset']
+    data = data['results']
+    # print(meta)
+    ordered_data = {'Precipitation': [[], []], 'MaxTemp': [[], []], 'MinTemp': [[], []], 'TOBS?': [[], []]}
     for i in data:
         match i['datatype']:
             case 'PRCP':

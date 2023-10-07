@@ -12,11 +12,13 @@ def getImportantData(raw_data):
         data.append(value)
 
     return data
+
+
 def getCurrentData():
     raw_data = requests.get(
         url="https://waterservices.usgs.gov/nwis/iv/?format=json&sites=01303152&siteStatus=all"
     ).json()
-
+    print(raw_data)
     return getImportantData(raw_data)
 
 def getTrainingData():

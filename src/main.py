@@ -1,8 +1,8 @@
 import data.NCEI as NCEI
-import data.USGS
+import data.USGS as USGS
 # import ai
 
 #data = data.USGS.getTrainingData()
 #ai.train(data)
 
-print(NCEI.getCurrentNCEIData())
+print(NCEI.getData('2023-10-1', '2023-10-3'))
