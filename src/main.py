@@ -1,6 +1,8 @@
-import data.NCEI
+import data.NCEI as NCEI
 import data.USGS
-import ai
+# import ai
 
-data = data.USGS.getTrainingData()
-ai.train(data)
+#data = data.USGS.getTrainingData()
+#ai.train(data)
+
+print(NCEI.getCurrentNCEIData())

@@ -1,6 +1,5 @@
 import requests
 import json
-
 def getImportantData(raw_data):
     # data_names = []
     data = []
@@ -13,15 +12,12 @@ def getImportantData(raw_data):
         data.append(value)
 
     return data
-
-
 def getCurrentData():
     raw_data = requests.get(
         url="https://waterservices.usgs.gov/nwis/iv/?format=json&sites=01303152&siteStatus=all"
     ).json()
 
     return getImportantData(raw_data)
-
 
 def getTrainingData():
     file = open("raw_data.json", "r")
