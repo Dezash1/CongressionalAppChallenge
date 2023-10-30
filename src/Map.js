@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import L from 'leaflet';
 // postCSS import of Leaflet's CSS
 import 'leaflet/dist/leaflet.css';
@@ -207,14 +207,11 @@ class Map extends Component {
   }
 
   render() {
-    const { subwayLinesFilter } = this.state;
     return (
       <div id="mapUI">
         {
           /* render the Filter component only after the subwayLines array has been created */
-            <Overlay lines={subwayLineNames}
-              curFilter={subwayLinesFilter}
-              filterLines={this.updateMap} />
+            <Overlay />
         }
         <div ref={(node) => this._mapNode = node} id="map" />
       </div>

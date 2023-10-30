@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 // the UI component for filtering the subway entrances by subway line
 export default (props) => {
-  const { lines, filterLines } = props;
-  let [location, setLocation] = useState();
+  // const { location, setLocation } = props;
+  const [location, setLocation] = useState('Jeff');
 
   // this is the JSX that will become the Filter UI in the DOM, notice it looks pretty similar to HTML
   // notice in the select element onChange is set to the updateFilter method
@@ -13,7 +13,8 @@ export default (props) => {
     <div className="filterSubwayLines">
       <hr/>
       <h3>Location</h3>
-      <input type='text' value={location} onChange={(val) => setLocation(val)}></input>      
+      <p>{location}</p>
+      <input type='text' value={location} onChange={setLocation}></input>      
     </div>
   );
 };
