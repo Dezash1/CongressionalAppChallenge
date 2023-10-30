@@ -65,8 +65,8 @@
     "@types/react": "^18.2.33",
     "json-loader": "^0.5.4",
     "leaflet": "^0.7.7",
-    "react": "^15.7.0",
-    "react-dom": "^15.2.1"
+    "react": "^18.3.0-canary-0c6348758-20231030",
+    "react-dom": "^18.3.0-canary-0c6348758-20231030"
   },
   "eslintConfig": {
     "extends": "./config/eslint.js"
