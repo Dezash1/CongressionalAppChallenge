@@ -15,7 +15,7 @@ config.params = {
   zoomControl: false,
   zoom: 10,
   maxZoom: 19,
-  minZoom: 11,
+  minZoom: 7,
   scrollwheel: false,
   legends: true,
   infoControl: false,
@@ -24,8 +24,7 @@ config.params = {
 config.tileLayer = {
   uri: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
   params: {
-    minZoom: 11,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    minZoom: 7,
     id: '',
     accessToken: ''
   }

@@ -5,5 +5,18 @@
     "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" }
   },
 
-  "features": []
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "NAME": "Cold Spring Harbor High School",
+        "URL": "",
+        "LINE": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.4592618, 40.8666663]
+      }
+    }
+  ]
 }
