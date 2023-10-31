@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { getDataFromSites } from './getData';
+
+const apiURL = 'https://waterservices.usgs.gov/nwis/iv/?format=json&siteStatus=all&sites=';
 
 const sites = [
   {"siteId": "01304000", "coordinates": ["40.8499", "-73.22"]},
@@ -7,7 +10,7 @@ const sites = [
   {"siteId": "01304500", "coordinates": ["40.914", "-72.69"]},
   {"siteId": "01304562", "coordinates": ["40.92", "-72.64"]},
   {"siteId": "01304650", "coordinates": ["41.044", "-72.32"]},
-  {"siteId": "01304705", "coordinates": ["40.933", "-72.144"]},
+  // {"siteId": "01304705", "coordinates": ["40.933", "-72.144"]},
   {"siteId": "01304746", "coordinates": ["40.85", "-72.5"]},
   {"siteId": "01304920", "coordinates": ["40.8", "-72.75"]},
   {"siteId": "01305000", "coordinates": ["40.830", "-72.906"]},
@@ -43,7 +46,7 @@ function getNearestSite(lat, long) {
 
 // the UI component for filtering the subway entrances by subway line
 export default (props) => {
-  const [location, setLocation] = useState("");
+  const [data, setData] = useState([]);
 
   const [lat, setLat] = useState([]);
   const [long, setLong] = useState([]);
@@ -60,19 +63,42 @@ export default (props) => {
     if (lat != [] && long != []) {
       const site = getNearestSite(lat, long);
 
-      setLocation(site);
+      console.log("Site", site);
+
+      fetch(apiURL + site)
+      .then(response => {
+        // Check if the response is successful (status code 200)
+        if (!response.ok) {
+          throw new Error(`Request failed with status: ${response.status}`);
+        }
+        // Parse the response as JSON
+        return response.json();
+      })
+      .then(newData => {
+        // Do something with the JSON data returned by the API
+        console.log("New Data", newData);
+      
+      if (newData != undefined) {
+
+      setData([]);
+
+      for (let v of newData.value.timeSeries) {
+          const name = v.variable.variableDescription;
+          const value = v.values[0].value[0].value;
+
+          console.log("Name-value", name, value);          
+
+          setData((old) => [...old, name + ": " + value]);
+      }}
+
+      console.log("Set Data:", data);
+      })
+      .catch(error => {
+        // Handle errors, such as network issues or invalid API responses
+        console.error('Error:', error);
+      });
     }
   }, [lat, long]);
-
-  function getPosition() {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      setLat(position.coords.latitude);
-      setLong(position.coords.longitude);
-    });
-
-    console.log("Latitude is:", lat);
-    console.log("Longitude is:", long);
-  }
 
   // this is the JSX that will become the Filter UI in the DOM, notice it looks pretty similar to HTML
   // notice in the select element onChange is set to the updateFilter method
@@ -83,8 +109,7 @@ export default (props) => {
       <hr/>
       <h3>Location</h3>
       <p>{lat}, {long}</p>
-      <input type='text' value={location} onChange={(val) => setLocation(val.currentTarget.value)}></input>
-      <button onClick={getPosition}>Get Current Position</button>     
+      {data.map(v => <p>{v}</p>)}
     </div>
   );
 };
