@@ -86,6 +86,10 @@ export default (props) => {
           const name = v.variable.variableDescription;
           const value = v.values[0].value[0].value;
 
+          if (parseFloat(value) < 0) {
+            continue;
+          }
+
           console.log("Name-value", name, value);          
 
           setData((old) => [...old, name + ": " + value]);
