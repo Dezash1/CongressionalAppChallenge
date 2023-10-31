@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getDataFromSites } from './getData';
+import DataPoint from './DataPoint';
 
 const apiURL = 'https://waterservices.usgs.gov/nwis/iv/?format=json&siteStatus=all&sites=';
 
@@ -55,9 +56,8 @@ export default (props) => {
     navigator.geolocation.getCurrentPosition(function(position) {
       setLat(position.coords.latitude);
       setLong(position.coords.longitude);
-    });
 
-    console.log("Latitude is:", lat);
+      console.log("Latitude is:", lat);
     console.log("Longitude is:", long);
 
     if (lat != [] && long != []) {
@@ -92,7 +92,7 @@ export default (props) => {
 
           console.log("Name-value", name, value);          
 
-          setData((old) => [...old, name + ": " + value]);
+          setData((old) => [...old, {"name": name, "value": value, "good": Math.random() > .5}]);
       }}
 
       console.log("Set Data:", data);
@@ -102,7 +102,8 @@ export default (props) => {
         console.error('Error:', error);
       });
     }
-  }, [lat, long]);
+    });
+  }, []);
 
   // this is the JSX that will become the Filter UI in the DOM, notice it looks pretty similar to HTML
   // notice in the select element onChange is set to the updateFilter method
@@ -113,7 +114,7 @@ export default (props) => {
       <hr/>
       <h3>Location</h3>
       <p>{lat}, {long}</p>
-      {data.map(v => <p>{v}</p>)}
+      {data.map(v => <DataPoint key={v.name} data={v}></DataPoint>)}
     </div>
   );
 };
