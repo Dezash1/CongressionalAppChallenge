@@ -45,19 +45,42 @@ function getNearestSite(lat, long) {
   return smallestSite;
 }
 
-// the UI component for filtering the subway entrances by subway line
+function isGood(name, value) {
+    if (name.includes("Temperature")) {
+        return value > 16;
+    }
+    else if (name.includes("Specific conductance")) {
+        return value < 10000;
+    }
+    else if (name.includes("Dissolved oxygen")) {
+        return value > 6.5 && value < 8.5;
+    }
+    else if (name.includes("pH")) {
+        return value > 6 && value < 8;
+    }
+    else if (name.includes("Turbidity")) {
+        return value < 1.3; 
+    }
+    else if (name.includes("Salinity")) {
+        return true;
+    }
+    console.log("returning null");
+    return null;
+}
+
 export default (props) => {
   const [data, setData] = useState([]);
 
   const [lat, setLat] = useState([]);
+  const [rating, setRating] = useState([]);
   const [long, setLong] = useState([]);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(function(position) {
       setLat(position.coords.latitude);
-      setLong(position.coords.longitude);
+      setLong(position.coords.longitude);   
 
-      console.log("Latitude is:", lat);
+    console.log("Latitude is:", lat);
     console.log("Longitude is:", long);
 
     if (lat != [] && long != []) {
@@ -82,6 +105,8 @@ export default (props) => {
 
       setData([]);
 
+          let goodCount = 0;
+          let totalCount = 0;
       for (let v of newData.value.timeSeries) {
           const name = v.variable.variableDescription;
           const value = v.values[0].value[0].value;
@@ -91,9 +116,26 @@ export default (props) => {
           }
 
           console.log("Name-value", name, value);          
+          let good = isGood(name, value);
 
-          setData((old) => [...old, {"name": name, "value": value, "good": Math.random() > .5}]);
-      }}
+          if (good == null) {
+              continue;
+          }
+          else if (good == true) {
+              goodCount++;
+          }
+
+          totalCount++;
+          setData((old) => [...old, {"name": name, "value": value, "good": good}]);
+      }
+          console.log(`good count: ${goodCount} total count: ${totalCount}`);
+          if (goodCount / totalCount >= .7) {
+              setRating("Good \uD83D\uDC4D")
+          }
+          else {
+              setRating("Bad \uD83D\uDC4E");
+          }
+      }
 
       console.log("Set Data:", data);
       })
@@ -112,7 +154,7 @@ export default (props) => {
   return (
     <div className="filterSubwayLines">
       <hr/>
-      <h3>Location</h3>
+      <h3>Location Rating: {rating}</h3>
       <p>{lat}, {long}</p>
       {data.map(v => <DataPoint key={v.name} data={v}></DataPoint>)}
     </div>
