@@ -30,22 +30,25 @@ const sites = [
     { "siteId": "01309225", "coordinates": ["40.67", "-73.35"] },
     { "siteId": "403727073154503", "coordinates": ["40.624", "-73.26"] },
     { "siteId": "405149072532201", "coordinates": ["40.8637", "-72.88899"] },
-    { "siteId": "405250073180801", "coordinates": ["40.880889", "-73.301"] }
+    { "siteId": "405250073180801", "coordinates": ["40.880889", "-73.301"] },
+    { "siteId": "01648010", "coordinates": ["38.960167", "-77.042056"] },
+    { "siteId": "01651812", "coordinates": ["38.87991667", "-76.9708333"] },
 ];
 
 function getSquaredDistance(lat1, long1, lat2, long2) {
-    return Math.pow(lat2 - lat1, 2) + Math.pow(long2 - long1, 2);
+    return (Math.pow(lat2 - lat1, 2) + Math.pow(long2 - long1, 2));
 }
 
 function getNearestSite(lat, long) {
     let smallestDistance = getSquaredDistance(lat, sites[0]["coordinates"][0], long, sites[0]["coordinates"][1]);
-    let smallestSite = sites[0]["siteId"];
+    let smallestSite = sites[0];
 
     for (let i in sites) {
         const dist = getSquaredDistance(lat, sites[i]["coordinates"][0], long, sites[i]["coordinates"][1]);
-        if (smallestDistance > dist) {
+        console.log(`${sites[i].siteId}: ${dist}`);
+        if (smallestDistance < dist) {
             smallestDistance = dist;
-            smallestSite = sites[i]["siteId"];
+            smallestSite = sites[i];
         }
     }
 
@@ -75,13 +78,6 @@ function isGood(name, value) {
     return null;
 }
 
-function popup_content() {
-    let ret = ""
-    navigator.geolocation.getCurrentPosition(function(position) {
-    });
-    return ret;
-}
-
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 
@@ -108,9 +104,24 @@ config.tileLayer = {
     }
 };
 
-// array to store unique names of Brooklyn subway lines,
-// this eventually gets passed down to the Filter component
-let subwayLineNames = [];
+function dataColor(good) {
+    if (good) {
+        return "green";
+    }
+    return "red";
+}
+
+function doTheMarkerThing(markers, contents) {
+    console.log("why?: " + markers.length);
+    for (let idx in markers) {
+        console.log("buster");
+        markers[idx].bindPopup(contents[idx]);
+    }
+}
+
+function formatDatapoint(data) {
+    return `<div style="display: flex; flexDirection: row"><p style="width: 85%">${data.name}</p><p style="color: ${dataColor(data.good)}; font-size: 12px; text-align: right; flex-grow: 1">${data.value}</p></div>`;
+}
 
 class Map extends Component {
     constructor(props) {
@@ -144,31 +155,62 @@ class Map extends Component {
     updatePosition(map) {
         //NOTE: add the current location marker
         navigator.geolocation.getCurrentPosition(function(position) {
-            console.log("added location marker")
-            var latlng = new L.LatLng(position.coords.latitude, position.coords.longitude);
+            console.log("added location marker; long: " + position.longitude);
+
+            let lat = position.coords.latitude;
+            let long = position.coords.longitude;
+            console.log("lat: " + lat);
+            console.log("long: " + long);
+
+            var latlng = new L.LatLng(lat, long);
+            L.circle(latlng, {
+                color: 'green',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+                radius: 100
+            }).addTo(map);
+            // map.panTo(latlng);
+            console.log("built latlng");
+
+
+
+            console.log("Latitude is:", lat);
+            console.log("Longitude is:", long);
+
+            const ns = getNearestSite(lat, long);
+            var latlngns = new L.LatLng(ns.coordinates[0], ns.coordinates[1]);
+            console.log(`Panning to ${ns.coordinates[0]}, ${ns.coordinates[1]}`);
+            map.panTo(latlngns);
+        }, function(error) {
+            console.log(error);
+        });
+
+        let markers = [];
+        let contents = [];
+
+
+
+        let count = 0;
+        for (let v of sites) {
+            
+            var latlng = new L.LatLng(v.coordinates[0], v.coordinates[1]);
             var marker = L.circle(latlng, {
                 color: 'white',
                 fillColor: '#f03',
                 fillOpacity: 0.5,
                 radius: 100
-            }).addTo(map);
-            map.panTo(latlng);
+            });
 
+            console.log("pushed marker (length): " + markers.length);
+            markers.push(marker);
 
-            let lat = position.coords.latitude
-            let long = position.coords.longitude
+            marker.addTo(map);
 
-            console.log("Latitude is:", lat);
-            console.log("Longitude is:", long);
-
-            let rating = "Unkown"
-            let data = []
-            let ret = ""
-            if (lat != [] && long != []) {
-                const site = getNearestSite(lat, long);
-
-                console.log("Site", site);
-                fetch(apiURL + site)
+            let rating = "Unknown";
+            let data = [];
+            let ret = "";
+                console.log("Site", v.siteId);
+                fetch(apiURL + v.siteId)
                     .then(response => {
                         // Check if the response is successful (status code 200)
                         if (!response.ok) {
@@ -208,33 +250,48 @@ class Map extends Component {
                             }
                             console.log(`good count: ${goodCount} total count: ${totalCount}`);
                             if (goodCount / totalCount >= .7) {
-                                rating = "Good \uD83D\uDC4D"
+                                rating = "Good \uD83D\uDC4D";
                             }
                             else {
                                 rating = "Bad \uD83D\uDC4E";
                             }
                         }
 
-                        console.log("Set Data:", data);
-                        console.log("Data.map: " + data.map(v => `<DataPoint key={${v.name}} data={${v}}></DataPoint>`));
-                        ret = "<h3>Current Location</h3><p>Rating: " + rating + "</p>" + "<p>Latitude: " + lat + "</p>" + "<p>Longitude: " + long + "</p>" + data.map(v => `<DataPoint key={${v.name}} data={${v}}></DataPoint>`);
+                        // console.log("Set Data:", data);
+                        // console.log("Data.map: " + data.map(v => formatDatapoint(v)).join(""));
+                        ret = "<h3>Current Location</h3><p>Rating: " + rating + "</p>" + "<p>Latitude: " + v.coordinates[0] + "</p>" + "<p>Longitude: " + v.coordinates[1] + "</p>" + data.map(v => formatDatapoint(v)).join("");
 
+        let p = new L.popup({autoClose: false, closeOnClick: false}).setContent(ret);
+                        contents.push(p);
+                        // marker.bindPopup(ret).openPopup();
+                        // p.setContent(ret);
+                        // marker.bindPopup(p);
 
+                        console.log("count: " + count);
+                        if (count == sites.length - 1) {
+                            doTheMarkerThing(markers, contents);
+                        }
 
+                        
+                        // marker.on("click", function() {
+                        //     console.log("Potatoe");
+                        //     marker.openPopup();
+                        // });
 
-                        marker.bindPopup(ret).openPopup();
+                        // marker.addEventListener("click", function() {
+                        //     console.log("Potatoe");
+                        //     marker.openPopup();
+                        // });
+                        count++;
                     })
                     .catch(error => {
-                        // Handle errors, such as network issues or invalid API responses
                         console.error('Error:', error);
                     });
-            }
+        }
 
+     
 
-        }, function(error) {
-            console.log(error);
-        });
-        console.log("updated position")
+        console.log("updated position");
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -363,11 +420,11 @@ class Map extends Component {
             }
 
             // assemble the HTML for the markers' popups (Leaflet's bindPopup method doesn't accept React JSX)
-            const popupContent = `<h3>${feature.properties.NAME}</h3>
-        <strong>Access to MTA lines: </strong>${feature.properties.LINE}`;
+            // const popupContent = `<h3>${feature.properties.NAME}</h3>
+        // <strong>Access to MTA lines: </strong>${feature.properties.LINE}`;
 
             // add our popups
-            layer.bindPopup(popupContent);
+            // layer.bindPopup(popupContent);
         }
     }
 
@@ -384,7 +441,7 @@ class Map extends Component {
         // set our state to include the tile layer
         this.setState({ map, tileLayer });
 
-        this.updatePosition(map)
+        this.updatePosition(map);
     }
 
     render() {
